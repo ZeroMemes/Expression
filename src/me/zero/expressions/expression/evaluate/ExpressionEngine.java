@@ -51,7 +51,7 @@ public class ExpressionEngine {
                     this.evaluator.getGlobals().put(symbol.get(0).value(), val);
                     return OptionalDouble.of(val);
                 }
-                if (signature.matches("(VARIABLE)+FUNCTION")) {
+                if (signature.matches("(VARIABLE)*FUNCTION")) {
                     var name = symbol.get(symbol.size() - 1).functionName();
                     var args = symbol.stream()
                         .filter(t -> t.type() == Token.Type.VARIABLE)
