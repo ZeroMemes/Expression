@@ -34,10 +34,8 @@ public class ExpressionEngine {
             .map(Tokenizer::convertToPostfix).toList();
 
         // Handle each split length case
-        switch (split.size()) {
-            case 1 -> {
-                return OptionalDouble.of(build(split.get(0)).eval(this.evaluator));
-            }
+        return switch (split.size()) {
+            case 1 -> OptionalDouble.of(build(split.get(0)).eval(this.evaluator));
             case 2 -> {
                 var symbol = split.get(0);
                 var value = build(split.get(1));
@@ -49,7 +47,7 @@ public class ExpressionEngine {
                     // TODO: Address recursive reference for redefinition
                     var val = value.eval(this.evaluator);
                     this.evaluator.getGlobals().put(symbol.get(0).value(), val);
-                    return OptionalDouble.of(val);
+                    yield OptionalDouble.of(val);
                 }
                 if (signature.matches("(VARIABLE)*FUNCTION")) {
                     var name = symbol.get(symbol.size() - 1).functionName();
@@ -57,12 +55,12 @@ public class ExpressionEngine {
                         .filter(t -> t.type() == Token.Type.VARIABLE)
                         .map(Token::value).toList();
                     this.evaluator.addFunction(name, args, value);
-                    return OptionalDouble.empty();
+                    yield OptionalDouble.empty();
                 }
                 throw new IllegalArgumentException("Invalid definition symbol");
             }
             default -> throw new IllegalArgumentException("Multiple assignments are not supported");
-        }
+        };
     }
 
     private static Expression build(List<Token> postfix) {
